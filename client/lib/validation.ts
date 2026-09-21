@@ -50,13 +50,13 @@ export const calculateAge = (birthDate: string): number | null => {
 };
 
 /**
- * Validate age is within required range (10-17 years)
+ * Validate age is within required range (12-20 years)
  * @param birthDate - Birth date in YYYY-MM-DD format
  * @returns {boolean} True if age is valid
  */
 export const validateAge = (birthDate: string): boolean => {
   const age = calculateAge(birthDate);
-  return age !== null && age >= 10 && age < 17;
+  return age !== null && age >= 12 && age <= 20;
 };
 
 /**
