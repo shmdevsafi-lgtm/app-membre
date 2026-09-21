@@ -132,6 +132,25 @@ export const handleRegister: RequestHandler = async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
+    // Validate age (12-20 years)
+    const birth = new Date(birth_date);
+    if (isNaN(birth.getTime()) || birth > new Date()) {
+      return res.status(400).json({ error: "Invalid birth date" });
+    }
+    const now = new Date();
+    let memberAge = now.getFullYear() - birth.getFullYear();
+    if (
+      now.getMonth() < birth.getMonth() ||
+      (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())
+    ) {
+      memberAge--;
+    }
+    if (memberAge < 12 || memberAge > 20) {
+      return res
+        .status(400)
+        .json({ error: "L'âge doit être compris entre 12 et 20 ans" });
+    }
+
     const adminClient = getSupabaseAdminClient();
     const passwordHash = await bcrypt.hash(password, 12);
     let registrationResult = await adminClient
