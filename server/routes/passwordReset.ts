@@ -36,8 +36,8 @@ function getSupabaseAdminClient() {
                                           const IDENTITY_ERROR = "Identité non vérifiée. Vérifiez le nom, le prénom, l’ID et l’UUID.";
 
                                           async function sendResetPin(email: string, name: string, pin: string) {
-                                            const smtpUser = process.env.SMTP_USER;
-                                              const smtpPass = process.env.SMTP_PASS;
+                                            const smtpUser = (process.env.SMTP_USER || "").trim();
+                                              const smtpPass = (process.env.SMTP_PASS || "").replace(/\s+/g, "");
                                                 if (!smtpUser || !smtpPass) throw new Error("SMTP_USER et SMTP_PASS doivent être configurés.");
 
                                                   // Same transport defaults as server/routes/email.ts (the account-creation
@@ -46,9 +46,9 @@ function getSupabaseAdminClient() {
                                                         // meant this flow silently used a different SMTP config than the one
                                                           // that's actually known to work with the configured Gmail account.
                                                             const transporter = nodemailer.createTransport({
-                                                                host: process.env.SMTP_HOST || "smtp.gmail.com",
+                                                                host: (process.env.SMTP_HOST || "smtp.gmail.com").trim(),
                                                                     port: Number(process.env.SMTP_PORT || 587),
-                                                                        secure: process.env.SMTP_SECURE === "true",
+                                                                        secure: (process.env.SMTP_SECURE || "").trim() === "true",
                                                                             auth: { user: smtpUser, pass: smtpPass },
                                                                               });
 
@@ -177,4 +177,3 @@ function getSupabaseAdminClient() {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     return res.status(500).json({ ok: false, error: "Impossible de mettre à jour le mot de passe." });
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       }
                                                                                                                                                                                                                                                                                                   };
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
