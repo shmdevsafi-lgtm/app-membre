@@ -12,14 +12,28 @@ function getSupabaseAdminClient() {
   return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
 }
 
-const transporter = nodemailer.createTransport({
+// .trim() : un espace ou un retour à la ligne collé dans Netlify suffit à faire échouer l'authentification
+const smtpUser = (process.env.SMTP_USER || "").trim();
+const smtpPass = (process.env.SMTP_PASS || "").replace(/\s+/g, "");
+
+// Diagnostic sans révéler le secret : visible dans les logs Netlify Functions
+console.info("[SMTP diag]", {
   host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT || 587),
-  secure: process.env.SMTP_SECURE === "true",
-  auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+  port: process.env.SMTP_PORT,
+  secure: process.env.SMTP_SECURE,
+  user: smtpUser,
+  passLength: smtpPass.length, // un mot de passe d'application Google fait 16 caractères
+  passHadWhitespace: (process.env.SMTP_PASS || "") !== smtpPass,
 });
 
-if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+const transporter = nodemailer.createTransport({
+  host: (process.env.SMTP_HOST || "smtp.gmail.com").trim(),
+  port: Number(process.env.SMTP_PORT || 587),
+  secure: (process.env.SMTP_SECURE || "").trim() === "true",
+  auth: { user: smtpUser, pass: smtpPass },
+});
+
+if (process.env.SMTP_HOST && smtpUser && smtpPass) {
   transporter.verify((error) => {
     if (error) console.error("Erreur de connexion SMTP :", error.message);
     else console.info("Connexion SMTP OK, prêt à envoyer des emails.");
@@ -84,7 +98,7 @@ export const handleSendEmail: RequestHandler = async (req, res) => {
 
   try {
     const info = await transporter.sendMail({
-      from: `"${escapeHtml(nom || "Site Web")}" <${process.env.SMTP_USER}>`,
+      from: `"${escapeHtml(nom || "Site Web")}" <${smtpUser}>`,
       to: email,
       subject: typeof sujet === "string" && sujet.trim() ? sujet.trim() : "Nouveau message depuis le site",
       html: buildHtmlEmail({ name: nom, message, pin }),
@@ -139,3 +153,4 @@ export const handleVerifyPin: RequestHandler = async (req, res) => {
   if (!consumed) return res.status(400).json({ ok: false, error: "Ce PIN a déjà été utilisé." });
   return res.json({ ok: true, message: "Confirmation réussie." });
 };
+
