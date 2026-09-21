@@ -9,6 +9,8 @@ import { generateMemberId } from "../lib/memberIdGenerator";
 import { MemberBadge } from "@/components/MemberBadge";
 import Header from "@/components/Header";
 
+const EMAIL_DELIVERY_NOTICE = "Consultez votre boîte de réception. Si vous ne trouvez pas l’e-mail, vérifiez le dossier spam. Sinon, contactez shmdevsafi@gmail.com ou 0675202336.";
+
 interface RegistrationData {
   firstName?: string;
   lastName?: string;
@@ -148,7 +150,7 @@ export default function AccountConfirmation() {
       });
       const result = await response.json();
       if (!response.ok || !result.ok) throw new Error(result.error || "Documents non envoyés");
-      setPinStatus("تم إرسال البطاقة ورمز QR إلى بريدك الإلكتروني");
+      setPinStatus(`تم إرسال البطاقة ورمز QR إلى بريدك الإلكتروني\n\n${EMAIL_DELIVERY_NOTICE}`);
     } catch (error) {
       console.error("Documents email error:", error);
       setPinStatus("تم إنشاء المستندات لكن تعذر إرسالها بالبريد الإلكتروني");
@@ -174,7 +176,7 @@ export default function AccountConfirmation() {
       });
       const result = await response.json();
       if (!response.ok || !result.ok) throw new Error(result.error || "Email non envoyé");
-      setPinStatus("تم إرسال رمز التأكيد إلى بريدك الإلكتروني");
+      setPinStatus(`تم إرسال رمز التأكيد إلى بريدك الإلكتروني\n\n${EMAIL_DELIVERY_NOTICE}`);
     } catch (error) {
       console.error("Confirmation email error:", error);
       setPinStatus("تعذر إرسال رمز التأكيد");
@@ -444,8 +446,11 @@ export default function AccountConfirmation() {
                 تأكيد
               </button>
             </div>
-            {pinStatus && <p className="text-center text-sm mt-3 text-gray-600">{pinStatus}</p>}
           </div>
+        )}
+
+        {pinStatus && (
+          <p className="text-center text-sm mt-3 text-gray-600 whitespace-pre-line">{pinStatus}</p>
         )}
 
         {/* Action Buttons */}
