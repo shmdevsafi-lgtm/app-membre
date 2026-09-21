@@ -116,7 +116,12 @@ export default function ForgotPassword() {
           <h1 className="text-3xl font-bold text-gray-800 mb-2">استعادة كلمة المرور</h1>
           <p className="text-gray-600">
             {phase === "identity" && "أدخل معلومات العضو للتحقق من هويتك"}
-            {phase === "pin" && `تم إرسال الرمز إلى ${emailMasked}`}
+            {phase === "pin" && (
+              <>
+                <span>تم إرسال الرمز إلى {emailMasked}</span>
+                <span className="block text-sm mt-2">Consultez votre boîte de réception. Si vous ne trouvez pas l’e-mail, vérifiez le dossier spam. Sinon, contactez shmdevsafi@gmail.com ou 0675202336.</span>
+              </>
+            )}
             {phase === "password" && "أدخل كلمة المرور الجديدة"}
           </p>
         </div>
